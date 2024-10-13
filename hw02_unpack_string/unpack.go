@@ -58,21 +58,22 @@ func lastElem(i int, count int) bool {
 }
 
 func matchPattern(curr rune, next rune) bool {
-	_, currIsDigit := strconv.Atoi(string(curr))
-	_, nextIsDigit := strconv.Atoi(string(next))
-	return !isDigit(currIsDigit) && isDigit(nextIsDigit)
+	currIsDigit := isDigit(curr)
+	nextIsDigit := isDigit(next)
+	return !currIsDigit && nextIsDigit
 }
 
 func isNumber(s []rune, i int, count int) bool {
 	if i+2 < count {
-		_, errSecond := strconv.Atoi(string(s[i+1]))
-		_, errThird := strconv.Atoi(string(s[i+2]))
-		return isDigit(errSecond) && isDigit(errThird)
+		nextIsDigit := isDigit(s[i+1])
+		thirdIsDigit := isDigit(s[i+2])
+		return nextIsDigit && thirdIsDigit
 	}
 	return false // length is too short
 }
 
-func isDigit(err error) bool {
+func isDigit(r rune) bool {
+	_, err := strconv.Atoi(string(r))
 	return err == nil
 }
 
