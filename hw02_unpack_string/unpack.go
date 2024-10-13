@@ -10,8 +10,8 @@ import (
 var ErrInvalidString = errors.New("invalid string")
 
 func main() {
-	input := ""
-	expected := ""
+	input := `qwe\\\3`
+	expected := `qwe\3`
 	res, err := Unpack(input)
 	if err != nil {
 		fmt.Println("Failed")
@@ -41,6 +41,27 @@ func Unpack(data string) (string, error) {
 			times := takeTimes(s[i+1])
 			res.WriteString(strings.Repeat(string(s[i]), times))
 			i++
+		case matchBackslash(s[i], s[i+1]):
+			switch {
+			case isDigit(s[i+1]) && i+2 < count && isDigit(s[i+2]):
+				times := takeTimes(s[i+2])
+				res.WriteString(strings.Repeat(string(s[i+1]), times))
+				i += 2
+			case isDigit(s[i+1]):
+				res.WriteString(string(s[i+1]))
+				i++
+			case isBackslash(s[i+1]) && i+2 < count && isDigit(s[i+2]):
+				times := takeTimes(s[i+2])
+				res.WriteString(strings.Repeat(string(s[i+1]), times))
+				i += 2
+			case isBackslash(s[i+1]) && isBackslash(s[i+2]):
+				res.WriteString(string(s[i]))
+				i += countBackslash(s, i)
+				res.WriteString(string(s[i]))
+				fmt.Println(i)
+			default:
+				return "", ErrInvalidString
+			}
 		default:
 			res.WriteString(string(s[i]))
 		}
@@ -60,7 +81,7 @@ func lastElem(i int, count int) bool {
 func matchPattern(curr rune, next rune) bool {
 	currIsDigit := isDigit(curr)
 	nextIsDigit := isDigit(next)
-	return !currIsDigit && nextIsDigit
+	return !currIsDigit && nextIsDigit && string(curr) != "\\"
 }
 
 func isNumber(s []rune, i int, count int) bool {
@@ -77,7 +98,23 @@ func isDigit(r rune) bool {
 	return err == nil
 }
 
+func isBackslash(r rune) bool {
+	return string(r) == "\\"
+}
+
 func takeTimes(num rune) int {
 	n, _ := strconv.Atoi(string(num))
+	return n
+}
+
+func matchBackslash(curr rune, next rune) bool {
+	return string(curr) == "\\" && (isDigit(next) || string(next) == "\\")
+}
+
+func countBackslash(data []rune, i int) int {
+	n := 0
+	for string(data[i+n]) == "\\" {
+		n++
+	}
 	return n
 }
