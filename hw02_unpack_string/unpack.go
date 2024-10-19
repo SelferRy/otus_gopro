@@ -9,16 +9,6 @@ import (
 
 var ErrInvalidString = errors.New("invalid string")
 
-func main() {
-	input := `qwe\\\3`
-	expected := `qwe\3`
-	res, err := Unpack(input)
-	if err != nil {
-		fmt.Println("Failed")
-	}
-	fmt.Println(res)
-	fmt.Println(expected)
-}
 
 func Unpack(data string) (string, error) {
 	if len(data) == 0 {
