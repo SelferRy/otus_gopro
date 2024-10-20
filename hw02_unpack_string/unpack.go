@@ -44,16 +44,15 @@ func backslashStrategy(s []rune, ind *int, count int, res *strings.Builder) erro
 	switch {
 	case isForbidden(s, i):
 		return ErrInvalidString
-	case isNextDigit(s, i):
+	case isDigit(s[i+1]):
 		i = backslashDigitStrategy(s, i, count, res)
 	case isMultiplyBackslash(s, i, count):
 		times := takeMultiplier(s[i+2])
 		res.WriteString(strings.Repeat(string(s[i+1]), times))
 		i += 2
-	case isManyBackslashes(s, i):
-		res.WriteString(string(s[i]))
-		i += countBackslash(s, i)
-		res.WriteString(string(s[i]))
+	case isBackslash(s[i+1]): // isManyBackslashes(s, i):
+		res.WriteString(string(s[i+1]))
+		i++
 	default:
 		return ErrInvalidString
 	}
@@ -76,15 +75,6 @@ func backslashDigitStrategy(s []rune, i int, count int, res *strings.Builder) in
 func isForbidden(r []rune, i int) bool {
 	next := r[i+1]
 	return !isDigit(next) && !isBackslash(next)
-}
-
-func isManyBackslashes(s []rune, i int) bool {
-	next, third := s[i+1], s[i+2]
-	return isBackslash(next) && isBackslash(third)
-}
-
-func isNextDigit(s []rune, i int) bool {
-	return isDigit(s[i+1])
 }
 
 func isMultiplyBackslash(s []rune, i int, count int) bool {
@@ -141,12 +131,4 @@ func takeMultiplier(num rune) int {
 
 func matchBackslash(curr rune) bool {
 	return string(curr) == "\\"
-}
-
-func countBackslash(data []rune, i int) int {
-	n := 0
-	for matchBackslash(data[i+n]) {
-		n++
-	}
-	return n
 }

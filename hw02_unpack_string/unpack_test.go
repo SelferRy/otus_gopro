@@ -67,7 +67,3 @@ func TestIsMultiplyDigit(t *testing.T) {
 	require.False(t, isMultiplyDigit([]rune{'\\', '4', '\\'}, 0, 3))
 	require.False(t, isMultiplyDigit([]rune{'\\', '4'}, 0, 2))
 }
-
-func TestIsSingleDigit(t *testing.T) {
-	require.True(t, isNextDigit([]rune{'\\', '4'}, 0))
-}
