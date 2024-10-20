@@ -44,13 +44,8 @@ func backslashStrategy(s []rune, ind *int, count int, res *strings.Builder) erro
 	switch {
 	case isForbidden(s, i):
 		return ErrInvalidString
-	case isMultiplyDigit(s, i, count):
-		times := takeMultiplier(s[i+2])
-		res.WriteString(strings.Repeat(string(s[i+1]), times))
-		i += 2
-	case isSingleDigit(s, i):
-		res.WriteString(string(s[i+1]))
-		i++
+	case isDigitAfter(s, i):
+		i = backslashDigitStrategy(s, i, count, res)
 	case isMultiplyBackslash(s, i, count):
 		times := takeMultiplier(s[i+2])
 		res.WriteString(strings.Repeat(string(s[i+1]), times))
@@ -64,6 +59,18 @@ func backslashStrategy(s []rune, ind *int, count int, res *strings.Builder) erro
 	}
 	*ind = i // write value to outer variable
 	return nil
+}
+
+func backslashDigitStrategy(s []rune, i int, count int, res *strings.Builder) int {
+	if isMultiplyDigit(s, i, count) {
+		times := takeMultiplier(s[i+2])
+		res.WriteString(strings.Repeat(string(s[i+1]), times))
+		i += 2
+	} else {
+		res.WriteString(string(s[i+1]))
+		i++
+	}
+	return i
 }
 
 func isForbidden(r []rune, i int) bool {
@@ -80,7 +87,7 @@ func isMultiplyBackslash(s []rune, i int, count int) bool {
 	return isBackslash(s[i+1]) && i+2 < count && isDigit(s[i+2])
 }
 
-func isSingleDigit(s []rune, i int) bool {
+func isDigitAfter(s []rune, i int) bool {
 	return isDigit(s[i+1])
 }
 
@@ -132,7 +139,7 @@ func matchBackslash(curr rune) bool {
 
 func countBackslash(data []rune, i int) int {
 	n := 0
-	for string(data[i+n]) == "\\" {
+	for matchBackslash(data[i+n]) {
 		n++
 	}
 	return n
