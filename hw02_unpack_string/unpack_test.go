@@ -69,5 +69,5 @@ func TestIsMultiplyDigit(t *testing.T) {
 }
 
 func TestIsSingleDigit(t *testing.T) {
-	require.True(t, isDigitAfter([]rune{'\\', '4'}, 0))
+	require.True(t, isNextDigit([]rune{'\\', '4'}, 0))
 }

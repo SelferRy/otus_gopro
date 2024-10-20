@@ -13,7 +13,7 @@ func Unpack(data string) (string, error) {
 		return "", nil
 	}
 	s := []rune(data)
-	if isDigit(s[0]) {
+	if first := s[0]; isDigit(first) {
 		return "", ErrInvalidString
 	}
 	var res strings.Builder
@@ -44,7 +44,7 @@ func backslashStrategy(s []rune, ind *int, count int, res *strings.Builder) erro
 	switch {
 	case isForbidden(s, i):
 		return ErrInvalidString
-	case isDigitAfter(s, i):
+	case isNextDigit(s, i):
 		i = backslashDigitStrategy(s, i, count, res)
 	case isMultiplyBackslash(s, i, count):
 		times := takeMultiplier(s[i+2])
@@ -83,16 +83,22 @@ func isManyBackslashes(s []rune, i int) bool {
 	return isBackslash(next) && isBackslash(third)
 }
 
-func isMultiplyBackslash(s []rune, i int, count int) bool {
-	return isBackslash(s[i+1]) && i+2 < count && isDigit(s[i+2])
-}
-
-func isDigitAfter(s []rune, i int) bool {
+func isNextDigit(s []rune, i int) bool {
 	return isDigit(s[i+1])
 }
 
+func isMultiplyBackslash(s []rune, i int, count int) bool {
+	next := s[i+1]
+	return isBackslash(next) && isThirdDigit(s, i, count)
+}
+
 func isMultiplyDigit(s []rune, i int, count int) bool {
-	return isDigit(s[i+1]) && i+2 < count && isDigit(s[i+2])
+	next := s[i+1]
+	return isDigit(next) && isThirdDigit(s, i, count)
+}
+
+func isThirdDigit(s []rune, i int, count int) bool {
+	return i+2 < count && isDigit(s[i+2])
 }
 
 func patternStrategy(s []rune, i *int, res *strings.Builder) {
