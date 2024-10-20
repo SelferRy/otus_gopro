@@ -1,21 +1,19 @@
-package main
+package hw02unpackstring
 
 import (
 	"errors"
-	"fmt"
 	"strconv"
 	"strings"
 )
 
 var ErrInvalidString = errors.New("invalid string")
 
-
 func Unpack(data string) (string, error) {
 	if len(data) == 0 {
 		return "", nil
 	}
 	s := []rune(data)
-	if firstIsDigit(s[0]) {
+	if isDigit(s[0]) {
 		return "", ErrInvalidString
 	}
 	var res strings.Builder
@@ -28,29 +26,11 @@ func Unpack(data string) (string, error) {
 			if isNumber(s, i, count) {
 				return "", ErrInvalidString
 			}
-			times := takeTimes(s[i+1])
-			res.WriteString(strings.Repeat(string(s[i]), times))
-			i++
-		case matchBackslash(s[i], s[i+1]):
-			switch {
-			case isDigit(s[i+1]) && i+2 < count && isDigit(s[i+2]):
-				times := takeTimes(s[i+2])
-				res.WriteString(strings.Repeat(string(s[i+1]), times))
-				i += 2
-			case isDigit(s[i+1]):
-				res.WriteString(string(s[i+1]))
-				i++
-			case isBackslash(s[i+1]) && i+2 < count && isDigit(s[i+2]):
-				times := takeTimes(s[i+2])
-				res.WriteString(strings.Repeat(string(s[i+1]), times))
-				i += 2
-			case isBackslash(s[i+1]) && isBackslash(s[i+2]):
-				res.WriteString(string(s[i]))
-				i += countBackslash(s, i)
-				res.WriteString(string(s[i]))
-				fmt.Println(i)
-			default:
-				return "", ErrInvalidString
+			patternStrategy(s, &i, &res)
+		case matchBackslash(s[i]):
+			err := backslashStrategy(s, &i, count, &res)
+			if err != nil {
+				return "", err
 			}
 		default:
 			res.WriteString(string(s[i]))
@@ -59,9 +39,59 @@ func Unpack(data string) (string, error) {
 	return res.String(), nil
 }
 
-func firstIsDigit(first rune) bool {
-	_, err := strconv.Atoi(string(first))
-	return err == nil
+func backslashStrategy(s []rune, ind *int, count int, res *strings.Builder) error {
+	i := *ind // for comfort work
+	switch {
+	case isForbidden(s, i):
+		return ErrInvalidString
+	case isMultiplyDigit(s, i, count):
+		times := takeMultiplier(s[i+2])
+		res.WriteString(strings.Repeat(string(s[i+1]), times))
+		i += 2
+	case isSingleDigit(s, i):
+		res.WriteString(string(s[i+1]))
+		i++
+	case isMultiplyBackslash(s, i, count):
+		times := takeMultiplier(s[i+2])
+		res.WriteString(strings.Repeat(string(s[i+1]), times))
+		i += 2
+	case isManyBackslashes(s, i):
+		res.WriteString(string(s[i]))
+		i += countBackslash(s, i)
+		res.WriteString(string(s[i]))
+	default:
+		return ErrInvalidString
+	}
+	*ind = i // write value to outer variable
+	return nil
+}
+
+func isForbidden(r []rune, i int) bool {
+	next := r[i+1]
+	return !isDigit(next) && !isBackslash(next)
+}
+
+func isManyBackslashes(s []rune, i int) bool {
+	next, third := s[i+1], s[i+2]
+	return isBackslash(next) && isBackslash(third)
+}
+
+func isMultiplyBackslash(s []rune, i int, count int) bool {
+	return isBackslash(s[i+1]) && i+2 < count && isDigit(s[i+2])
+}
+
+func isSingleDigit(s []rune, i int) bool {
+	return isDigit(s[i+1])
+}
+
+func isMultiplyDigit(s []rune, i int, count int) bool {
+	return isDigit(s[i+1]) && i+2 < count && isDigit(s[i+2])
+}
+
+func patternStrategy(s []rune, i *int, res *strings.Builder) {
+	times := takeMultiplier(s[*i+1])
+	res.WriteString(strings.Repeat(string(s[*i]), times))
+	*i++
 }
 
 func lastElem(i int, count int) bool {
@@ -84,21 +114,20 @@ func isNumber(s []rune, i int, count int) bool {
 }
 
 func isDigit(r rune) bool {
-	_, err := strconv.Atoi(string(r))
-	return err == nil
+	return r >= '0' && r <= '9'
 }
 
 func isBackslash(r rune) bool {
 	return string(r) == "\\"
 }
 
-func takeTimes(num rune) int {
+func takeMultiplier(num rune) int {
 	n, _ := strconv.Atoi(string(num))
 	return n
 }
 
-func matchBackslash(curr rune, next rune) bool {
-	return string(curr) == "\\" && (isDigit(next) || string(next) == "\\")
+func matchBackslash(curr rune) bool {
+	return string(curr) == "\\"
 }
 
 func countBackslash(data []rune, i int) int {
