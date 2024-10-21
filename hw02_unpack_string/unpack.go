@@ -12,64 +12,57 @@ func Unpack(data string) (string, error) {
 	if len(data) == 0 {
 		return "", nil
 	}
-	s := []rune(data)
-	if first := s[0]; isDigit(first) {
+	r := []rune(data)
+	if first := r[0]; isDigit(first) {
 		return "", ErrInvalidString
 	}
 	var res strings.Builder
-	count := len(s)
+	count := len(r)
 	for i := 0; i < count; i++ {
+		currRune := r[i]
 		switch {
 		case lastElem(i, count):
-			res.WriteString(string(s[i]))
-		case matchPattern(s[i], s[i+1]):
-			if isNumber(s, i, count) {
+			res.WriteString(string(currRune))
+		case matchMultiplier(currRune, r[i+1]):
+			if isNumber(r, i, count) {
 				return "", ErrInvalidString
 			}
-			patternStrategy(s, &i, &res)
-		case matchBackslash(s[i]):
-			err := backslashStrategy(s, &i, count, &res)
+			nextRune := r[i+1]
+			times := takeMultiplier(nextRune)
+			res.WriteString(strings.Repeat(string(currRune), times))
+			i++
+		case matchBackslash(currRune):
+			step, nextRune, times, err := backslashStrategy(r, i, count)
 			if err != nil {
 				return "", err
 			}
+			res.WriteString(strings.Repeat(string(nextRune), times))
+			i += step
 		default:
-			res.WriteString(string(s[i]))
+			res.WriteString(string(currRune))
 		}
 	}
 	return res.String(), nil
 }
 
-func backslashStrategy(s []rune, ind *int, count int, res *strings.Builder) error {
-	i := *ind // for comfort work
+func backslashStrategy(r []rune, i int, count int) (int, rune, int, error) {
+	var step, times int
+	var nextRune = r[i+1]
 	switch {
-	case isForbidden(s, i):
-		return ErrInvalidString
-	case isDigit(s[i+1]):
-		i = backslashDigitStrategy(s, i, count, res)
-	case isMultiplyBackslash(s, i, count):
-		times := takeMultiplier(s[i+2])
-		res.WriteString(strings.Repeat(string(s[i+1]), times))
-		i += 2
-	case isBackslash(s[i+1]): // isManyBackslashes(s, i):
-		res.WriteString(string(s[i+1]))
-		i++
+	case isForbidden(r, i):
+		return 0, rune(0), 0, ErrInvalidString
+	case isDigit(nextRune):
+		step, times = backslashDigitStrategy(r, i, count)
+	case isMultiplyBackslash(r, i, count):
+		times = takeMultiplier(r[i+2])
+		step = 2
+	case isBackslash(nextRune): // many backslashes case
+		times = 1
+		step = 1
 	default:
-		return ErrInvalidString
+		return 0, rune(0), 0, ErrInvalidString
 	}
-	*ind = i // write value to outer variable
-	return nil
-}
-
-func backslashDigitStrategy(s []rune, i int, count int, res *strings.Builder) int {
-	if isMultiplyDigit(s, i, count) {
-		times := takeMultiplier(s[i+2])
-		res.WriteString(strings.Repeat(string(s[i+1]), times))
-		i += 2
-	} else {
-		res.WriteString(string(s[i+1]))
-		i++
-	}
-	return i
+	return step, nextRune, times, nil
 }
 
 func isForbidden(r []rune, i int) bool {
@@ -77,40 +70,46 @@ func isForbidden(r []rune, i int) bool {
 	return !isDigit(next) && !isBackslash(next)
 }
 
-func isMultiplyBackslash(s []rune, i int, count int) bool {
-	next := s[i+1]
-	return isBackslash(next) && isThirdDigit(s, i, count)
+func backslashDigitStrategy(r []rune, i int, count int) (int, int) {
+	var step, times int
+	if isMultiplyDigit(r, i, count) {
+		times = takeMultiplier(r[i+2])
+		step = 2
+	} else {
+		times = 1
+		step = 1
+	}
+	return step, times
 }
 
-func isMultiplyDigit(s []rune, i int, count int) bool {
-	next := s[i+1]
-	return isDigit(next) && isThirdDigit(s, i, count)
+func isMultiplyDigit(r []rune, i int, count int) bool {
+	next := r[i+1]
+	return isDigit(next) && isThirdDigit(r, i, count)
 }
 
-func isThirdDigit(s []rune, i int, count int) bool {
-	return i+2 < count && isDigit(s[i+2])
+func isMultiplyBackslash(r []rune, i int, count int) bool {
+	next := r[i+1]
+	return isBackslash(next) && isThirdDigit(r, i, count)
 }
 
-func patternStrategy(s []rune, i *int, res *strings.Builder) {
-	times := takeMultiplier(s[*i+1])
-	res.WriteString(strings.Repeat(string(s[*i]), times))
-	*i++
+func isThirdDigit(r []rune, i int, count int) bool {
+	return i+2 < count && isDigit(r[i+2])
 }
 
 func lastElem(i int, count int) bool {
 	return i == count-1
 }
 
-func matchPattern(curr rune, next rune) bool {
+func matchMultiplier(curr rune, next rune) bool {
 	currIsDigit := isDigit(curr)
 	nextIsDigit := isDigit(next)
 	return !currIsDigit && nextIsDigit && string(curr) != "\\"
 }
 
-func isNumber(s []rune, i int, count int) bool {
+func isNumber(r []rune, i int, count int) bool {
 	if i+2 < count {
-		nextIsDigit := isDigit(s[i+1])
-		thirdIsDigit := isDigit(s[i+2])
+		nextIsDigit := isDigit(r[i+1])
+		thirdIsDigit := isDigit(r[i+2])
 		return nextIsDigit && thirdIsDigit
 	}
 	return false // length is too short
