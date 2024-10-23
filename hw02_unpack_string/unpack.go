@@ -31,11 +31,12 @@ func Unpack(data string) (string, error) {
 			times := takeMultiplier(nextRune)
 			res.WriteString(strings.Repeat(string(currRune), times))
 			i++
-		case matchBackslash(currRune):
-			step, nextRune, times, err := backslashStrategy(r, i, count)
-			if err != nil {
-				return "", err
+		case isBackslash(currRune):
+			if isForbidden(r, i) {
+				return "", ErrInvalidString
 			}
+			step, times := backslashStrategy(r, i, count)
+			nextRune := r[i+1]
 			res.WriteString(strings.Repeat(string(nextRune), times))
 			i += step
 		default:
@@ -45,12 +46,10 @@ func Unpack(data string) (string, error) {
 	return res.String(), nil
 }
 
-func backslashStrategy(r []rune, i int, count int) (int, rune, int, error) {
+func backslashStrategy(r []rune, i int, count int) (int, int) {
 	var step, times int
 	var nextRune = r[i+1]
 	switch {
-	case isForbidden(r, i):
-		return 0, rune(0), 0, ErrInvalidString
 	case isDigit(nextRune):
 		step, times = backslashDigitStrategy(r, i, count)
 	case isMultiplyBackslash(r, i, count):
@@ -59,10 +58,8 @@ func backslashStrategy(r []rune, i int, count int) (int, rune, int, error) {
 	case isBackslash(nextRune): // many backslashes case
 		times = 1
 		step = 1
-	default:
-		return 0, rune(0), 0, ErrInvalidString
 	}
-	return step, nextRune, times, nil
+	return step, times
 }
 
 func isForbidden(r []rune, i int) bool {
@@ -101,9 +98,7 @@ func lastElem(i int, count int) bool {
 }
 
 func matchMultiplier(curr rune, next rune) bool {
-	currIsDigit := isDigit(curr)
-	nextIsDigit := isDigit(next)
-	return !currIsDigit && nextIsDigit && string(curr) != "\\"
+	return !isDigit(curr) && isDigit(next) && string(curr) != "\\"
 }
 
 func isNumber(r []rune, i int, count int) bool {
@@ -126,8 +121,4 @@ func isBackslash(r rune) bool {
 func takeMultiplier(num rune) int {
 	n, _ := strconv.Atoi(string(num))
 	return n
-}
-
-func matchBackslash(curr rune) bool {
-	return string(curr) == "\\"
 }
