@@ -48,7 +48,7 @@ func Unpack(data string) (string, error) {
 
 func backslashStrategy(r []rune, i int, count int) (int, int) {
 	var step, times int
-	var nextRune = r[i+1]
+	nextRune := r[i+1]
 	switch {
 	case isDigit(nextRune):
 		step, times = backslashDigitStrategy(r, i, count)
