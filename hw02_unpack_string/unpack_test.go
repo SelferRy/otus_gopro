@@ -27,6 +27,7 @@ func TestUnpack(t *testing.T) {
 		{input: `\32`, expected: `33`},
 		{input: `\\ \32`, expected: `\ 33`},
 		{input: `\\\32`, expected: `\33`},
+		{input: "d\n5abc", expected: "d\n\n\n\n\nabc"},
 	}
 
 	for _, tc := range tests {
