@@ -1,9 +1,8 @@
 package hw03frequencyanalysis
 
 import (
-	"strings"
-
 	"sort"
+	"strings"
 )
 
 func Top10(s string) []string {
@@ -27,7 +26,7 @@ func countWords(slices []string) map[string]int {
 }
 
 func takeTop(counter map[string]int, n int) []string {
-	var ordered = sortKeys(counter)
+	ordered := sortKeys(counter)
 	return trim(ordered, n)
 }
 
@@ -48,7 +47,7 @@ func sortKeys(counter map[string]int) []string {
 }
 
 func trim(ordered []string, n int) []string {
-	var res []string
+	res := make([]string, 0, n)
 	var count int
 	for _, s := range ordered {
 		if count >= n {
@@ -56,7 +55,6 @@ func trim(ordered []string, n int) []string {
 		}
 		res = append(res, s)
 		count++
-
 	}
 	return res
 }

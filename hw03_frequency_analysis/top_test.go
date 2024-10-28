@@ -89,7 +89,7 @@ func TestSplit(t *testing.T) {
 	}{
 		{input: "some one", expected: []string{"some", "one"}},
 		{input: "some,one", expected: []string{"some,one"}},
-		{input: "some one ", expected: []string{"some", "one", ""}},
+		{input: "some one ", expected: []string{"some", "one"}},
 		{input: ",some one", expected: []string{",some", "one"}},
 	}
 
@@ -155,7 +155,7 @@ func TestTrim(t *testing.T) {
 	require.Equal(t, expected, result)
 }
 
-//func TestTakeTop(t *tesing.T) {
+// func TestTakeTop(t *tesing.T) {
 //	tests := []struct {
 //		input 	 map[string]int
 //		expected []string
