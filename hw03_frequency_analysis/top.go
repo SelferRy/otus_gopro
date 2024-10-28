@@ -37,27 +37,14 @@ func sortKeys(counter map[string]int) []string {
 		keys = append(keys, key)
 	}
 
-	sortLex(keys)
-	sortVal(keys, counter)
-	return keys
-}
-
-// value sorting
-func sortVal(keys []string, counter map[string]int) {
+	// value sorting with lexicographic sorting
 	sort.Slice(keys, func(i, j int) bool {
 		if counter[keys[i]] == counter[keys[j]] {
 			return keys[i] < keys[j]
 		}
 		return counter[keys[i]] > counter[keys[j]]
 	})
-}
-
-//Expected :[]string{"он", "а", "и", "ты", "что", "-", "Кристофер", "если", "не", "то"}
-//Actual   :[]string{"он", "а", "и", "ты", "что", "то", "Кристофер", "не", "если", "-"}
-
-// lexicographic sorting
-func sortLex(keys []string) {
-	sort.Strings(keys)
+	return keys
 }
 
 func trim(ordered []string, n int) []string {

@@ -163,19 +163,3 @@ func TestTrim(t *testing.T) {
 //		{input: map[string]int{"some": 1, "one": 1}, expected: []string{}},
 //	}
 //}
-
-func TestLexSort(t *testing.T) {
-	t.Run("positive test", func(t *testing.T) {
-		expected := []string{
-			"-",         // 4
-			"Кристофер", // 4
-			"если",      // 4
-			"не",        // 4
-			"то",        // 4
-		}
-		result := make([]string, len(expected))
-		copy(result, expected)
-		sortLex(result)
-		require.Equal(t, expected, result)
-	})
-}
