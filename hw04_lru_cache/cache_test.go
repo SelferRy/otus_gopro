@@ -77,3 +77,47 @@ func TestCacheMultithreading(t *testing.T) {
 
 	wg.Wait()
 }
+
+func TestCache_Set(t *testing.T) {
+	t.Run("empty cache", func(t *testing.T) {
+		c := NewCache(10)
+
+		newToCache := c.Set("aaa", 100)
+		require.False(t, newToCache)
+
+		wasInCache := c.Set("aaa", 2)
+		require.True(t, wasInCache)
+	})
+}
+
+func TestCache_Get(t *testing.T) {
+	t.Run("empty cache", func(t *testing.T) {
+		c := NewCache(10)
+
+		c.Set("aaa", 100)
+		val, ok := c.Get("aaa")
+		require.True(t, ok)
+		require.Equal(t, 100, val)
+
+		valNil, notOk := c.Get("bbb")
+		require.False(t, notOk)
+		require.Nil(t, valNil)
+	})
+}
+
+func TestCache_Clear(t *testing.T) {
+	t.Run("clear cache", func(t *testing.T) {
+		c := NewCache(10)
+
+		c.Set("aaa", 100)
+		val, ok := c.Get("aaa")
+		require.True(t, ok)
+		require.Equal(t, 100, val)
+
+		c.Clear()
+
+		valNil, notOk := c.Get("aaa")
+		require.False(t, notOk)
+		require.Nil(t, valNil)
+	})
+}
