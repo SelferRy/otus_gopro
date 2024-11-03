@@ -56,7 +56,7 @@ func TestCache(t *testing.T) {
 }
 
 func TestCacheMultithreading(t *testing.T) {
-	t.Skip() // Remove me if task with asterisk completed.
+	//t.Skip() // Remove me if task with asterisk completed.
 
 	c := NewCache(10)
 	wg := &sync.WaitGroup{}
@@ -146,8 +146,8 @@ func TestCachePreemption(t *testing.T) {
 			val, _ := c.Get(key)
 			require.Equal(t, i, val)
 		}
-		c.Get(Key("0"))
-		c.Set(Key("3"), 3)
+		c.Get("0")
+		c.Set("3", 3)
 		hasToPreemption := Key("1")
 		val, notOk := c.Get(hasToPreemption)
 		require.Nil(t, val)
