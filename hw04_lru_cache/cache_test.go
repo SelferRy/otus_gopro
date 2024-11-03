@@ -1,6 +1,7 @@
 package hw04lrucache
 
 import (
+	"fmt"
 	"math/rand"
 	"strconv"
 	"sync"
@@ -119,5 +120,21 @@ func TestCache_Clear(t *testing.T) {
 		valNil, notOk := c.Get("aaa")
 		require.False(t, notOk)
 		require.Nil(t, valNil)
+	})
+}
+
+func TestCachePreemption(t *testing.T) {
+	t.Run("Queue preemption test", func(t *testing.T) {
+		c := NewCache(3)
+		for i := range 4 {
+			key := Key(fmt.Sprintf("%d", i))
+			c.Set(key, i)
+			val, _ := c.Get(key)
+			require.Equal(t, i, val)
+		}
+		hasToPreemption := Key("0")
+		val, notOk := c.Get(hasToPreemption)
+		require.Nil(t, val)
+		require.False(t, notOk)
 	})
 }
