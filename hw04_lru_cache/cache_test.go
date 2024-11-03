@@ -49,34 +49,34 @@ func TestCache(t *testing.T) {
 		require.False(t, ok)
 		require.Nil(t, val)
 	})
-
-	t.Run("purge logic", func(t *testing.T) {
-		// Write me
-	})
 }
 
 func TestCacheMultithreading(t *testing.T) {
-	//t.Skip() // Remove me if task with asterisk completed.
-
 	c := NewCache(10)
+	threshold := 1_000_000
+	latest := threshold - 1
 	wg := &sync.WaitGroup{}
 	wg.Add(2)
 
 	go func() {
 		defer wg.Done()
-		for i := 0; i < 1_000_000; i++ {
+		for i := 0; i < threshold; i++ {
 			c.Set(Key(strconv.Itoa(i)), i)
 		}
 	}()
 
 	go func() {
 		defer wg.Done()
-		for i := 0; i < 1_000_000; i++ {
+		for i := 0; i < threshold; i++ {
 			c.Get(Key(strconv.Itoa(rand.Intn(1_000_000))))
 		}
 	}()
 
 	wg.Wait()
+	t.Run("Concurrency tests", func(t *testing.T) {
+		res, _ := c.Get(Key(strconv.Itoa(latest)))
+		require.Equal(t, latest, res)
+	})
 }
 
 func TestCache_Set(t *testing.T) {

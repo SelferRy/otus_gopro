@@ -94,5 +94,8 @@ func TestList_Remove(t *testing.T) {
 		l.PushFront(10)
 		first := l.Front()
 		l.Remove(first)
+		require.Nil(t, l.Front())
+		require.Nil(t, l.Back())
+		require.Equal(t, 0, l.Len())
 	})
 }
