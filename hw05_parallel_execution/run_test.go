@@ -64,7 +64,30 @@ func TestRun(t *testing.T) {
 		elapsedTime := time.Since(start)
 		require.NoError(t, err)
 
-		require.Equal(t, runTasksCount, int32(tasksCount), "not all tasks were completed")
+		require.Equal(t, int32(tasksCount), runTasksCount, "not all tasks were completed")
 		require.LessOrEqual(t, int64(elapsedTime), int64(sumTime/2), "tasks were run sequentially?")
+	})
+}
+
+func TestExp(t *testing.T) {
+	t.Run("tasks without errors", func(t *testing.T) {
+		//var wg sync.WaitGroup
+		//ch := make(chan int, 4)
+		//wg.Add(1)
+		//go fillChannel(ch, &wg)
+		ch := fillChannel()
+		readChannel(ch)
+		//go func() { // the func is infra part (only for waiting -> control runtime)
+		//	wg.Wait()
+		//	defer close(ch) // global (in main-scope) var
+		//}()
+	})
+}
+
+func TestLoop(t *testing.T) {
+	t.Run("tasks without errors", func(t *testing.T) {
+		for range 10 {
+			fmt.Println("TEXT")
+		}
 	})
 }
