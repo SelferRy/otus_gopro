@@ -59,7 +59,8 @@ func readTaskChannel(chTasks <-chan Task, errLim int, goNum int) error {
 				if err != nil {
 					atomic.AddInt32(&countErr, 1)
 				}
-				//nolint:gosec
+				//linter complains about int32(errLim) (G115:gosec) but I check errLim earlier. That is why:
+				//nolint:all
 				if atomic.LoadInt32(&countErr) >= int32(errLim) || len(chTasks) == 0 {
 					return
 				}
