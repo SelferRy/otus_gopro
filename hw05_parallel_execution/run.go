@@ -16,19 +16,10 @@ func Run(tasks []Task, n, m int) error {
 	defer close(chTasks)
 	goNum := minVal(n, len(tasks))
 	err := readTaskChannel(chTasks, m, goNum)
-	//var wg sync.WaitGroup
-	//go buildTaskChannel(chTasks, tasks, &wg)
 	return err
 }
 
-//func fillTaskChannel(ch chan<- Task, tasks []Task, wg *sync.WaitGroup) {
-//	defer wg.Done()
-//	for _, t := range tasks {
-//		ch <- t
-//	}
-//}
-
-func buildTaskChannel(tasks []Task) chan Task { // ch chan<- Task, wg *sync.WaitGroup
+func buildTaskChannel(tasks []Task) chan Task {
 	ch := make(chan Task, len(tasks))
 	go func() {
 		for _, t := range tasks {
@@ -71,38 +62,3 @@ func readTaskChannel(chTasks <-chan Task, errLim int, goNum int) error {
 	}
 	return nil
 }
-
-//func fillChannel(ch chan<- int, wg *sync.WaitGroup) {
-//	defer wg.Done()
-//	for t := range 4 {
-//		ch <- t
-//	}
-//}
-
-//func fillChannel() chan int {
-//	n := 4
-//	ch := make(chan int, n)
-//	var wg sync.WaitGroup
-//
-//	wg.Add(1)
-//	go func() {
-//		defer wg.Done()
-//		for t := range n {
-//			ch <- t
-//		}
-//	}()
-//
-//	go func() { // the func is infra part (only for waiting -> control runtime)
-//		wg.Wait()
-//		defer close(ch) // global (in main-scope) var
-//	}()
-//
-//	return ch
-//}
-//
-//func readChannel(ch <-chan int) {
-//	for result := range ch {
-//		fmt.Printf("Received: %d\n", result)
-//	}
-//	fmt.Println("Done receiving!")
-//}
