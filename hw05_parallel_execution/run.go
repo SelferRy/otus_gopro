@@ -2,7 +2,6 @@ package hw05parallelexecution
 
 import (
 	"errors"
-	"fmt"
 	"sync"
 )
 
@@ -32,15 +31,11 @@ func Run(tasks []Task, n, m int) error {
 
 func buildTaskChannel(tasks []Task) chan Task { // ch chan<- Task, wg *sync.WaitGroup
 	ch := make(chan Task, len(tasks))
-	var wg sync.WaitGroup
-	wg.Add(1)
 	go func() {
-		defer wg.Done()
 		for _, t := range tasks {
 			ch <- t
 		}
 	}()
-	wg.Wait()
 	return ch
 }
 
@@ -88,30 +83,30 @@ func readTaskChannel(chTasks <-chan Task, chErr chan<- error, goNum int) error {
 //	}
 //}
 
-func fillChannel() chan int {
-	n := 4
-	ch := make(chan int, n)
-	var wg sync.WaitGroup
-
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		for t := range n {
-			ch <- t
-		}
-	}()
-
-	go func() { // the func is infra part (only for waiting -> control runtime)
-		wg.Wait()
-		defer close(ch) // global (in main-scope) var
-	}()
-
-	return ch
-}
-
-func readChannel(ch <-chan int) {
-	for result := range ch {
-		fmt.Printf("Received: %d\n", result)
-	}
-	fmt.Println("Done receiving!")
-}
+//func fillChannel() chan int {
+//	n := 4
+//	ch := make(chan int, n)
+//	var wg sync.WaitGroup
+//
+//	wg.Add(1)
+//	go func() {
+//		defer wg.Done()
+//		for t := range n {
+//			ch <- t
+//		}
+//	}()
+//
+//	go func() { // the func is infra part (only for waiting -> control runtime)
+//		wg.Wait()
+//		defer close(ch) // global (in main-scope) var
+//	}()
+//
+//	return ch
+//}
+//
+//func readChannel(ch <-chan int) {
+//	for result := range ch {
+//		fmt.Printf("Received: %d\n", result)
+//	}
+//	fmt.Println("Done receiving!")
+//}
