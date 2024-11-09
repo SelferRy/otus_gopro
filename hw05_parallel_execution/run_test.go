@@ -3,8 +3,6 @@ package hw05parallelexecution
 import (
 	"errors"
 	"fmt"
-
-	//"fmt"
 	"math/rand"
 	"sync/atomic"
 	"testing"

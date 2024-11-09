@@ -2,6 +2,8 @@ package hw05parallelexecution
 
 import (
 	"errors"
+	"fmt"
+	"math"
 	"sync"
 	"sync/atomic"
 )
@@ -21,11 +23,15 @@ func Run(tasks []Task, n, m int) error {
 
 func buildTaskChannel(tasks []Task) chan Task {
 	ch := make(chan Task, len(tasks))
+	var wg sync.WaitGroup
+	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		for _, t := range tasks {
 			ch <- t
 		}
 	}()
+	wg.Wait()
 	return ch
 }
 
@@ -37,10 +43,13 @@ func minVal(a int, b int) int {
 }
 
 func readTaskChannel(chTasks <-chan Task, errLim int, goNum int) error {
-	var countErr int32
-	done := make(chan struct{}) // filled if max err
-	defer close(done)           // global (in main-scope) var
-	var wg sync.WaitGroup
+	var (
+		countErr int32
+		wg       sync.WaitGroup
+	)
+	if errLim >= math.MaxInt32 {
+		return fmt.Errorf("the maximum number of allowed errors has been exceeded")
+	}
 	for range goNum {
 		wg.Add(1)
 		go func() {
@@ -50,7 +59,8 @@ func readTaskChannel(chTasks <-chan Task, errLim int, goNum int) error {
 				if err != nil {
 					atomic.AddInt32(&countErr, 1)
 				}
-				if countErr >= int32(errLim) || len(chTasks) == 0 {
+				//nolint:gosec
+				if atomic.LoadInt32(&countErr) >= int32(errLim) || len(chTasks) == 0 {
 					return
 				}
 			}
