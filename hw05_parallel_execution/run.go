@@ -3,6 +3,7 @@ package hw05parallelexecution
 import (
 	"errors"
 	"sync"
+	"sync/atomic"
 )
 
 var ErrErrorsLimitExceeded = errors.New("errors limit exceeded")
@@ -11,12 +12,10 @@ type Task func() error
 
 // Run starts tasks in n goroutines and stops its work when receiving m errors from tasks.
 func Run(tasks []Task, n, m int) error {
-	chErr := make(chan error, m)
-	defer close(chErr)
 	chTasks := buildTaskChannel(tasks)
 	defer close(chTasks)
 	goNum := minVal(n, len(tasks))
-	err := readTaskChannel(chTasks, chErr, goNum)
+	err := readTaskChannel(chTasks, m, goNum)
 	//var wg sync.WaitGroup
 	//go buildTaskChannel(chTasks, tasks, &wg)
 	return err
@@ -46,7 +45,8 @@ func minVal(a int, b int) int {
 	return b
 }
 
-func readTaskChannel(chTasks <-chan Task, chErr chan<- error, goNum int) error {
+func readTaskChannel(chTasks <-chan Task, errLim int, goNum int) error {
+	var countErr int32
 	done := make(chan struct{}) // filled if max err
 	defer close(done)           // global (in main-scope) var
 	var wg sync.WaitGroup
@@ -61,16 +61,16 @@ func readTaskChannel(chTasks <-chan Task, chErr chan<- error, goNum int) error {
 				task := <-chTasks
 				err := task()
 				if err != nil {
-					chErr <- err
+					atomic.AddInt32(&countErr, 1)
 				}
-				if len(chErr) == cap(chErr) {
+				if countErr >= int32(errLim) {
 					done <- struct{}{}
 				}
 			}
 		}()
 	}
 	wg.Wait()
-	if len(chErr) > 0 {
+	if countErr > 0 {
 		return ErrErrorsLimitExceeded
 	}
 	return nil
