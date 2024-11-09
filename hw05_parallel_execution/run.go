@@ -54,17 +54,13 @@ func readTaskChannel(chTasks <-chan Task, errLim int, goNum int) error {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			select {
-			case <-done:
-				return
-			default:
-				task := <-chTasks
+			for task := range chTasks {
 				err := task()
 				if err != nil {
 					atomic.AddInt32(&countErr, 1)
 				}
-				if countErr >= int32(errLim) {
-					done <- struct{}{}
+				if countErr >= int32(errLim) || len(chTasks) == 0 {
+					return
 				}
 			}
 		}()
