@@ -18,7 +18,6 @@ func Run(tasks []Task, n, m int) error {
 		return ErrErrorsLimitExceeded
 	}
 	chTasks := buildTaskChannel(tasks)
-	defer close(chTasks)
 	goNum := minVal(n, len(tasks))
 	err := readTaskChannel(chTasks, m, goNum)
 	return err
@@ -26,6 +25,7 @@ func Run(tasks []Task, n, m int) error {
 
 func buildTaskChannel(tasks []Task) chan Task {
 	ch := make(chan Task, len(tasks))
+	defer close(ch)
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {
@@ -64,7 +64,7 @@ func readTaskChannel(chTasks <-chan Task, errLim int, goNum int) error {
 				}
 				//linter complains about int32(errLim) (G115:gosec) but I check errLim earlier. That is why:
 				//nolint:all
-				if atomic.LoadInt32(&countErr) >= int32(errLim) || len(chTasks) == 0 {
+				if atomic.LoadInt32(&countErr) >= int32(errLim) {
 					return
 				}
 			}
