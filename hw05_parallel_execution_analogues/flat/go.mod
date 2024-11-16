@@ -1,4 +1,4 @@
-module github.com/SelferRy/otus_gopro/hw05_parallel_execution_analog
+module github.com/SelferRy/otus_gopro/hw05_parallel_execution_analogues/flat
 
 go 1.22.2
 

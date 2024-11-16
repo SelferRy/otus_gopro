@@ -26,7 +26,6 @@ func Run(tasks []Task, n int, m int) error {
 	wg := sync.WaitGroup{}
 	goNum := minVal(n, len(tasks))
 	listenChannel(tasksChan, &errorCount, goNum, &wg)
-
 	fillChannel(tasksChan, &errorCount, tasks, m)
 	wg.Wait()
 
