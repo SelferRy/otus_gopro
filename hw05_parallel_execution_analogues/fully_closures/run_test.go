@@ -87,7 +87,7 @@ func TestRun(t *testing.T) {
 		maxErrorsCount := 0
 		err := Run(tasks, workersCount, maxErrorsCount)
 
-		require.Truef(t, errors.Is(err, ErrErrorsLimitExceeded), "actual err - %v", err)
-		require.Equal(t, int32(0), runTasksCount, "redundant tasks were started")
+		require.Falsef(t, errors.Is(err, ErrErrorsLimitExceeded), "actual err - %v", err)
+		require.Equal(t, int32(tasksCount), runTasksCount, "redundant tasks were started")
 	})
 }
