@@ -27,6 +27,7 @@ func doneStage(in In, done In) Out {
 	go func() {
 		defer func() {
 			close(out) // without it process will inf waiting
+			//nolint:all
 			for range in {
 				// The goroutine wait that channel has closed. Prevent deadlock and multiple closing
 			}
