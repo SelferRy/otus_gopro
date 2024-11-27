@@ -20,17 +20,25 @@ func ExecutePipeline(in In, done In, stages ...Stage) Out {
 	return in
 }
 
+// stage-wrap for shutdown all operations in a moment.
 func doneStage(in In, done In) Out {
 	out := make(Bi)
 
 	go func() {
-		defer close(out)
+		defer func() {
+			close(out) // without it process will inf waiting
+			for range in {
+				// The goroutine wait that channel has closed. Prevent deadlock and multiple closing
+			}
+		}()
+
+		// add done-check
 		for {
 			select {
 			case <-done:
 				return
 			case val, ok := <-in:
-				if !ok {
+				if !ok { // then in is empty
 					return
 				}
 				out <- val
