@@ -47,7 +47,7 @@ func TestCopy(t *testing.T) {
 			}
 		}()
 
-		_ = os.Chmod("test2.txt", 0444)
+		_ = os.Chmod("test2.txt", 0o444)
 
 		err := Copy("test1.txt", "test2.txt", 0, 0)
 		require.NotNil(t, err)

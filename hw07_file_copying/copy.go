@@ -94,8 +94,10 @@ func checkFromFile(fromStat os.FileInfo, offset int64) error {
 	case size == 0:
 		return fmt.Errorf("size = 0.\n%w", ErrEmptyFile)
 	case size < offset:
-		slog.Int64("size = ", size)
-		slog.Int64("offset = ", offset)
+		slog.Info("info for 'size < offset' case:",
+			slog.Int64("size = ", size),
+			slog.Int64("offset = ", offset),
+		)
 		return fmt.Errorf("offset is too much.\n%w", ErrOffsetExceedsFileSize)
 	default:
 		return nil
