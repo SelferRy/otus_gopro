@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"log/slog"
 )
 
 var (
@@ -17,6 +18,10 @@ func init() {
 }
 
 func main() {
+	slog.Info("Start process")
 	flag.Parse()
-	// Place your code here.
+	if err := Copy(from, to, offset, limit); err != nil {
+		slog.Any("error during copy", err)
+	}
+	slog.Info("End process")
 }
