@@ -6,6 +6,8 @@ import (
 	"io"
 	"log/slog"
 	"os"
+
+	"github.com/cheggaaa/pb/v3"
 )
 
 var (
@@ -58,7 +60,10 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 
 	limit = defineLimit(fromStat.Size(), limit, offset)
 
-	if _, err := io.CopyN(toFile, fromFile, limit); err != nil {
+	bar := pb.Full.Start64(limit)
+	defer bar.Finish()
+	barReader := bar.NewProxyReader(fromFile)
+	if _, err := io.CopyN(toFile, barReader, limit); err != nil {
 		return fmt.Errorf("copy error: %w", err)
 	}
 	return nil
