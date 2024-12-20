@@ -3,9 +3,9 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"log/slog"
 	"os"
+	"strings"
 )
 
 type Environment map[string]EnvValue
@@ -21,35 +21,57 @@ type EnvValue struct {
 func ReadDir(dir string) (Environment, error) {
 	files, err := os.ReadDir(dir)
 	if err != nil {
-		log.Fatal(err)
+		slog.Error("error os.ReadDir\n%w", err)
+		return nil, err
 	}
 
 	env := make(Environment, len(files))
 	for _, file := range files {
 		fmt.Println(file.Name())
-		env[file.Name()] = defineEnvVal(file.Name())
-
+		env[file.Name()], err = defineEnvVal(file.Name())
+		if err != nil {
+			return nil, err
+		}
 	}
-	return nil, nil
+	return env, nil
 }
 
-func defineEnvVal(fileName string) EnvValue {
+func defineEnvVal(fileName string) (EnvValue, error) {
 	file, err := os.Open(fileName)
 	if err != nil {
 		slog.Error("error with os.Open", err)
+		return EnvValue{}, err
 	}
 	defer func() {
 		err := file.Close()
-		slog.Error("error with os.File().Close", err)
-	}()
-	val := func() string {
-		reader := bufio.NewReader(file)
-		str, _, err := reader.ReadLine()
 		if err != nil {
-			slog.Error("error with bufio.NewReader(file).ReadLine%w", err)
+			slog.Error("error with os.File().Close", err)
 		}
-		return string(str)
 	}()
 
-	return EnvValue{val, false}
+	// handle fully empty case
+	if fileInfo, err := file.Stat(); err == nil && fileInfo.Size() == 0 {
+		return EnvValue{"", true}, nil
+	} else if err != nil {
+		slog.Error("error file.Stat()\n%w", err)
+		return EnvValue{}, err
+	}
+
+	// handle other cases
+	val, errVal := func() (string, error) {
+		reader := bufio.NewReader(file)
+		val, _, err := reader.ReadLine()
+		if err != nil {
+			slog.Error("error with bufio.NewReader(file).ReadLine\n%w", err)
+			return "", err
+		}
+		str := strings.TrimRight(string(val), " \n\t") // look at EMPTY and TRIM cases
+		str = strings.ReplaceAll(str, "\x00", "\n")    // look at FOO case
+		return str, nil
+	}()
+	if errVal != nil {
+		return EnvValue{}, errVal
+	}
+
+	return EnvValue{val, false}, nil
 }
