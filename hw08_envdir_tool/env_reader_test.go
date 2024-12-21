@@ -11,8 +11,8 @@ func TestReadDir(t *testing.T) {
 		target := Environment{
 			"BAR":   EnvValue{"bar", false},
 			"EMPTY": EnvValue{"", false},
-			"FOO":   EnvValue{"   foo", false},
-			"HELLO": EnvValue{"foo", false},
+			"FOO":   EnvValue{"   foo\nwith new line", false},
+			"HELLO": EnvValue{`"hello"`, false},
 			"UNSET": EnvValue{"", true},
 		}
 		result, err := ReadDir("./testdata/env/")
@@ -49,7 +49,7 @@ func TestDefineEnvVal(t *testing.T) {
 	})
 	t.Run("TRIM", func(t *testing.T) {
 		target := EnvValue{"   some a", false}
-		result, err := defineEnvVal("./testdata/env/TRIM")
+		result, err := defineEnvVal("./testdata/env_additional/TRIM")
 		require.NoError(t, err)
 		require.Equal(t, target, result)
 	})

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -27,8 +28,9 @@ func ReadDir(dir string) (Environment, error) {
 
 	env := make(Environment, len(files))
 	for _, file := range files {
-		fmt.Println(file.Name())
-		env[file.Name()], err = defineEnvVal(file.Name())
+		fileName := filepath.Join(dir, file.Name())
+		fmt.Println(fileName)
+		env[file.Name()], err = defineEnvVal(fileName)
 		if err != nil {
 			return nil, err
 		}
