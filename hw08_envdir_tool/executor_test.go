@@ -17,7 +17,7 @@ func TestRunCmd(t *testing.T) {
 	}{
 		{
 			cmd:  []string{"sh", "-c", "echo $HELLO $BAR"},
-			out:  "{\"hello\" false} {bar false}\n",
+			out:  "\"hello\" bar\n",
 			code: 0,
 		},
 		{

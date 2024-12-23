@@ -13,8 +13,8 @@ type Environment map[string]EnvValue
 
 func (e Environment) StringSlice() []string {
 	res := make([]string, 0, len(e))
-	for key, val := range e {
-		res = append(res, fmt.Sprintf("%v=%v", key, val))
+	for key, envVal := range e {
+		res = append(res, fmt.Sprintf("%v=%v", key, envVal.Value))
 	}
 	return res
 }
@@ -37,7 +37,6 @@ func ReadDir(dir string) (Environment, error) {
 	env := make(Environment, len(files))
 	for _, file := range files {
 		fileName := filepath.Join(dir, file.Name())
-		fmt.Println(fileName)
 		env[file.Name()], err = defineEnvVal(fileName)
 		if err != nil {
 			return nil, err
