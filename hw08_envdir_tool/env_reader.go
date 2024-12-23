@@ -30,7 +30,7 @@ type EnvValue struct {
 func ReadDir(dir string) (Environment, error) {
 	files, err := os.ReadDir(dir)
 	if err != nil {
-		slog.Error("error os.ReadDir\n%w", err)
+		slog.Info("error os.ReadDir\n%w", slog.Any("error", err))
 		return nil, err
 	}
 
@@ -49,13 +49,13 @@ func ReadDir(dir string) (Environment, error) {
 func defineEnvVal(fileName string) (EnvValue, error) {
 	file, err := os.Open(fileName)
 	if err != nil {
-		slog.Error("error with os.Open", err)
+		slog.Error("error with os.Open", slog.Any("error", err))
 		return EnvValue{}, err
 	}
 	defer func() {
 		err := file.Close()
 		if err != nil {
-			slog.Error("error with os.File().Close", err)
+			slog.Error("error with os.File().Close", slog.Any("error", err))
 		}
 	}()
 
@@ -63,7 +63,7 @@ func defineEnvVal(fileName string) (EnvValue, error) {
 	if fileInfo, err := file.Stat(); err == nil && fileInfo.Size() == 0 {
 		return EnvValue{"", true}, nil
 	} else if err != nil {
-		slog.Error("error file.Stat()\n%w", err)
+		slog.Error("error file.Stat()\n%w", slog.Any("error", err))
 		return EnvValue{}, err
 	}
 
@@ -72,7 +72,7 @@ func defineEnvVal(fileName string) (EnvValue, error) {
 		reader := bufio.NewReader(file)
 		val, _, err := reader.ReadLine()
 		if err != nil {
-			slog.Error("error with bufio.NewReader(file).ReadLine\n%w", err)
+			slog.Error("error with bufio.NewReader(file).ReadLine\n%w", slog.Any("error", err))
 			return "", err
 		}
 		str := strings.TrimRight(string(val), " \n\t") // look at EMPTY and TRIM cases

@@ -43,7 +43,7 @@ func TestRunCmd(t *testing.T) {
 			defer func() {
 				err := w.Close()
 				if err != nil {
-					slog.Error("error os.Pipe().w.Close()\n%w", err)
+					slog.Error("error os.Pipe().w.Close()\n%w", slog.Any("error", err))
 				}
 			}()
 			origStdout := os.Stdout
