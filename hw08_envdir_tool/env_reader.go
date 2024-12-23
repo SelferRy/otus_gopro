@@ -11,6 +11,14 @@ import (
 
 type Environment map[string]EnvValue
 
+func (e Environment) StringSlice() []string {
+	res := make([]string, 0, len(e))
+	for key, val := range e {
+		res = append(res, fmt.Sprintf("%v=%v", key, val))
+	}
+	return res
+}
+
 // EnvValue helps to distinguish between empty files and files with the first empty line.
 type EnvValue struct {
 	Value      string
