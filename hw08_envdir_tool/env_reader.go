@@ -52,14 +52,15 @@ func defineEnvVal(fileName string) (EnvValue, error) {
 		return EnvValue{}, err
 	}
 	defer func() {
-		err := file.Close()
+		err = file.Close()
 		if err != nil {
 			slog.Error("error with os.File().Close", slog.Any("error", err))
 		}
 	}()
 
 	// handle fully empty case
-	if fileInfo, err := file.Stat(); err == nil && fileInfo.Size() == 0 {
+	var fileInfo os.FileInfo
+	if fileInfo, err = file.Stat(); err == nil && fileInfo.Size() == 0 {
 		return EnvValue{"", true}, nil
 	} else if err != nil {
 		slog.Error("error file.Stat()\n%w", slog.Any("error", err))
@@ -69,13 +70,14 @@ func defineEnvVal(fileName string) (EnvValue, error) {
 	// handle other cases
 	val, errVal := func() (string, error) {
 		reader := bufio.NewReader(file)
-		val, _, err := reader.ReadLine()
+		var line []byte
+		line, _, err = reader.ReadLine()
 		if err != nil {
 			slog.Error("error with bufio.NewReader(file).ReadLine\n%w", slog.Any("error", err))
 			return "", err
 		}
-		str := strings.TrimRight(string(val), " \n\t") // look at EMPTY and TRIM cases
-		str = strings.ReplaceAll(str, "\x00", "\n")    // look at FOO case
+		str := strings.TrimRight(string(line), " \n\t") // look at EMPTY and TRIM cases
+		str = strings.ReplaceAll(str, "\x00", "\n")     // look at FOO case
 		return str, nil
 	}()
 	if errVal != nil {
