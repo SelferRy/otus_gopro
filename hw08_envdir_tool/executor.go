@@ -22,6 +22,9 @@ func RunCmd(cmd []string, env Environment) (returnCode int) {
 	execCmd := exec.Command(command, args...)
 	execCmd.Stdin, execCmd.Stdout, execCmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	err := setupEnv(env)
+	if err != nil {
+		slog.Error("problem with setupEnv", slog.Any("error", err))
+	}
 	if err = execCmd.Run(); err != nil {
 		slog.Error("execution error", slog.Any("error:", err))
 		var exitErr *exec.ExitError
@@ -33,7 +36,7 @@ func RunCmd(cmd []string, env Environment) (returnCode int) {
 	return execCmd.ProcessState.ExitCode()
 }
 
-// change environment variable
+// change environment variable.
 func setupEnv(env Environment) error {
 	for key, val := range env {
 		if val.NeedRemove {
