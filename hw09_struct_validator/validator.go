@@ -1,5 +1,9 @@
 package hw09structvalidator
 
+import "errors"
+
+var ErrValidation = errors.New("validation error")
+
 type ValidationError struct {
 	Field string
 	Err   error
