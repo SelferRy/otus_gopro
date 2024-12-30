@@ -35,6 +35,11 @@ type (
 		Code int    `validate:"in:200,404,500"`
 		Body string `json:"omitempty"`
 	}
+
+	Pipe struct {
+		Digits string `validate:"regexp:\\d+|len:20"`
+		Range  int    `validate:"min:0|max:100"`
+	}
 )
 
 func TestValidate(t *testing.T) {
@@ -70,9 +75,7 @@ func TestValidate(t *testing.T) {
 				Payload:   []byte{12},
 				Signature: []byte{58},
 			},
-			expectedErr: ValidationErrors{
-				// ValidationError{"", nil},
-			},
+			expectedErr: ValidationErrors{},
 		}, {
 			in: Response{
 				Code: 1,
@@ -80,6 +83,15 @@ func TestValidate(t *testing.T) {
 			},
 			expectedErr: ValidationErrors{
 				ValidationError{"Code", ErrValidation},
+			},
+		}, {
+			in: Pipe{
+				Digits: "2304234234",
+				Range:  500,
+			},
+			expectedErr: ValidationErrors{
+				ValidationError{"Digits", ErrValidation},
+				ValidationError{"Range", ErrValidation},
 			},
 		},
 	}
