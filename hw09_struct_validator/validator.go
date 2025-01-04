@@ -44,7 +44,7 @@ func Validate(v interface{}) error {
 func validateField(typeField reflect.StructField, valField reflect.Value) (ValidationError, error) {
 	constraintMap, err := defineConstraints(typeField)
 	if err != nil {
-		log.Fatal("tag parsing problem\n%w\n", err)
+		log.Fatal("defineConstraints(typeField) was broken: ", err)
 	}
 	var errValid error
 	for cName, cVal := range constraintMap {
@@ -70,6 +70,7 @@ func defineConstraints(field reflect.StructField) (map[string]string, error) {
 	for _, constr := range constraints {
 		parsedTag := strings.SplitN(constr, tagValSep, 2)
 		if len(parsedTag) != 2 {
+			slog.Error("problem with parsedTag", slog.Any("parsedTag", parsedTag))
 			return nil, ErrTagParsing
 		}
 		name, val := parsedTag[0], parsedTag[1]

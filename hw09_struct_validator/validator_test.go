@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/stretchr/testify/require"
-	"reflect"
 	"testing"
 )
 
@@ -40,6 +39,11 @@ type (
 	Pipe struct {
 		Digits string `validate:"regexp:\\d+|len:20"`
 		Range  int    `validate:"min:0|max:100"`
+	}
+
+	Period struct {
+		Start string `validate:"in:2025-01-01,2025-01-02"`
+		End   string `validate:"in:2025-01-01,2025-01-02"`
 	}
 )
 
@@ -128,6 +132,15 @@ func TestValidateTDD(t *testing.T) {
 			expectedErr: ValidationErrors{
 				ValidationError{"Version", nil},
 			},
+		}, {
+			in: Period{
+				Start: "2024-12-12", // `validate:"in:2025-01-01,2025-01-02"`
+				End:   "2025-01-01",
+			},
+			expectedErr: ValidationErrors{
+				ValidationError{"Start", ErrValidation},
+				ValidationError{"End", nil},
+			},
 		},
 	}
 
@@ -136,12 +149,6 @@ func TestValidateTDD(t *testing.T) {
 			t.Parallel()
 
 			err := Validate(tt.in)
-			lenErr := func(err error) int {
-				vc := reflect.ValueOf(err)
-				return vc.Len()
-			}
-			require.Equal(t, lenErr(err), 1)
-			require.Equal(t, tt.expectedErr.Error(), err.Error())
 			require.Equal(t, tt.expectedErr, err)
 		})
 	}
