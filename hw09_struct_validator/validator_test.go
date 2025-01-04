@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/stretchr/testify/require"
+	"reflect"
 	"testing"
 )
 
@@ -106,4 +107,49 @@ func TestValidate(t *testing.T) {
 			_ = tt
 		})
 	}
+}
+
+func TestValidateTDD(t *testing.T) {
+	tests := []struct {
+		in          interface{}
+		expectedErr error
+	}{
+		{
+			in: App{
+				Version: "1", // `validate:"len:5"`
+			},
+			expectedErr: ValidationErrors{
+				ValidationError{"Version", ErrValidation},
+			},
+		}, {
+			in: App{
+				Version: "11111", // `validate:"len:5"`
+			},
+			expectedErr: ValidationErrors{
+				ValidationError{"Version", nil},
+			},
+		},
+	}
+
+	for i, tt := range tests {
+		t.Run(fmt.Sprintf("case %d", i), func(t *testing.T) {
+			t.Parallel()
+
+			err := Validate(tt.in)
+			lenErr := func(err error) int {
+				vc := reflect.ValueOf(err)
+				return vc.Len()
+			}
+			require.Equal(t, lenErr(err), 1)
+			require.Equal(t, tt.expectedErr.Error(), err.Error())
+			require.Equal(t, tt.expectedErr, err)
+		})
+	}
+}
+
+func TestReadDir(t *testing.T) {
+	t.Run("read directory", func(t *testing.T) {
+		target := ErrValidation
+		require.ErrorIs(t, target, ErrValidation)
+	})
 }
