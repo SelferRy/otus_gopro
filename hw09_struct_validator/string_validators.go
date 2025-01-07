@@ -26,23 +26,22 @@ func stringInValidation(val, constrVal string) error {
 	for _, target := range inList {
 		if val == target {
 			return nil
-		} else {
-			return ErrValidation
 		}
 	}
-	slog.Info(
-		`Seems something wrong. Can be 'validate:"in:"' case. Check in-statement of validation.`,
-		slog.String("val", val),
-		slog.String("constrVal", val),
-	)
 	return ErrValidation
 }
 
-func stringRegexpValidation(val, constrVal string) error {
-	match, err := regexp.MatchString(val, constrVal)
+func stringRegexpValidation(val, pattern string) error {
+	match, err := regexp.MatchString(pattern, val)
 	if err != nil {
-		log.Fatal("regexp.MatchString(val, constrVal) was broken.")
+		log.Fatal("regexp.MatchString(val, pattern) was broken.")
 	}
+	slog.Debug(
+		"regexp",
+		slog.String("val", val),
+		slog.String("pattern", pattern),
+		slog.Any("match", match),
+	)
 	if match {
 		return nil
 	}
