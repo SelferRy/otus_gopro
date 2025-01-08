@@ -51,8 +51,8 @@ func validateField(typeField reflect.StructField, valField reflect.Value) (Valid
 		switch typeField.Type.Kind() {
 		case reflect.String:
 			errValid = validateString(valField.String(), cName, cVal)
-		//case reflect.Int:
-		//	errValid = validateInt(valField.Int(), cName, cVal)
+		case reflect.Int:
+			errValid = validateInt(valField.Int(), cName, cVal)
 		default:
 			errValid = ErrValidation
 		}

@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func validateString(val, constrName string, constrVal string) error {
+func validateString(val, constrName, constrVal string) error {
 	switch constrName {
 	case "len":
 		return stringLenValidation(val, constrVal)
