@@ -53,6 +53,8 @@ func validateField(typeField reflect.StructField, valField reflect.Value) (Valid
 			errValid = validateString(valField.String(), cName, cVal)
 		case reflect.Int:
 			errValid = validateInt(valField.Int(), cName, cVal)
+		case reflect.Slice:
+			errValid = validateSlice(valField, cName, cVal)
 		default:
 			errValid = ErrValidation
 		}
