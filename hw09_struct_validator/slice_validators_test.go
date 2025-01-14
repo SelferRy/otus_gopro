@@ -22,14 +22,22 @@ func TestValidateSliceLen(t *testing.T) {
 		in   structValidationData
 		want error
 	}{
-		{structValidationData{refVal([]string{"some", "othe"}), "len", "4"},
-			nil},
-		{structValidationData{refVal([]string{"some", "other"}), "len", "4"},
-			ErrValidation},
-		{structValidationData{refVal([]int{4, 16}), "in", "4,16"},
-			nil},
-		{structValidationData{refVal([]int{4, 17}), "in", "4,16"},
-			ErrValidation},
+		{
+			structValidationData{refVal([]string{"some", "othe"}), "len", "4"},
+			nil,
+		},
+		{
+			structValidationData{refVal([]string{"some", "other"}), "len", "4"},
+			ErrValidation,
+		},
+		{
+			structValidationData{refVal([]int{4, 16}), "in", "4,16"},
+			nil,
+		},
+		{
+			structValidationData{refVal([]int{4, 17}), "in", "4,16"},
+			ErrValidation,
+		},
 	}
 
 	for i, tt := range tests {

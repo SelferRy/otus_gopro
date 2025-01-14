@@ -18,7 +18,7 @@ func TestIntMinValidation(t *testing.T) {
 		data := int64(5)
 		threshold := "4"
 		result := intMinValidation(data, threshold)
-		var want error = nil
+		var want error
 		if !errors.Is(result, want) {
 			t.Fatalf(`intMinValidation(%d, %s) = %v, want %v`, data, threshold, result, want)
 		}

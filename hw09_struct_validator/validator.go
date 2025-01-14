@@ -2,6 +2,7 @@ package hw09structvalidator
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"log/slog"
 	"reflect"
@@ -34,10 +35,7 @@ func Validate(v interface{}) error {
 		valField := vVal.Field(i)
 		unvalidated := func() bool {
 			constr, _ := defineConstraints(typeField)
-			if constr == nil {
-				return true
-			}
-			return false
+			return constr == nil
 		}
 		if ok := unvalidated(); ok {
 			continue
@@ -54,7 +52,7 @@ func Validate(v interface{}) error {
 func validateField(typeField reflect.StructField, valField reflect.Value) (ValidationError, error) {
 	constraintMap, err := defineConstraints(typeField)
 	if err != nil {
-		log.Fatal("defineConstraints(typeField) was broken: ", err)
+		return ValidationError{}, fmt.Errorf("defineConstraints(typeField) was broken: %w", err)
 	}
 	var errValid error
 	for cName, cVal := range constraintMap {
@@ -69,10 +67,10 @@ func validateField(typeField reflect.StructField, valField reflect.Value) (Valid
 			errValid = ErrValidation
 		}
 	}
-	return ValidationError{Field: typeField.Name, Err: errValid}, nil // ValidationError{Field: "Version", Err: ErrValidation}, nil
+	return ValidationError{Field: typeField.Name, Err: errValid}, nil
 }
 
-// make map like {"len": 5, "...": "..."}
+// make map like {"len": 5, "...": "..."}.
 func defineConstraints(field reflect.StructField) (map[string]string, error) {
 	tag := field.Tag.Get("validate")
 	tagSep := "|"

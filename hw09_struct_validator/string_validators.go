@@ -56,7 +56,6 @@ func stringLenValidation(val, constrVal string) error {
 	valLen := len([]rune(val))
 	if valLen == requireLen {
 		return nil
-	} else {
-		return ErrValidation
 	}
+	return ErrValidation
 }

@@ -3,8 +3,9 @@ package hw09structvalidator
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 type UserRole string
@@ -108,7 +109,7 @@ func TestValidate(t *testing.T) {
 			t.Parallel()
 
 			err := Validate(tt.in)
-			//require.ErrorIs(t, err, tt.expectedErr)
+			// require.ErrorIs(t, err, tt.expectedErr)
 			require.Equal(t, tt.expectedErr, err)
 			_ = tt
 		})

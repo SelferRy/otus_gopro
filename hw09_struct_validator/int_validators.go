@@ -50,7 +50,7 @@ func intInValidation(val int64, constrVal string) error {
 	return nil
 }
 
-// convert constrVal to int64
+// convert constrVal to int64.
 func extractInt(val string) int64 {
 	cVal, err := strconv.Atoi(val)
 	if err != nil {

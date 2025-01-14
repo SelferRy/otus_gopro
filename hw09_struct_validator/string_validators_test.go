@@ -2,9 +2,10 @@ package hw09structvalidator
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/require"
 	"regexp"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 type testDataString struct {
@@ -12,7 +13,7 @@ type testDataString struct {
 	constraintVal string
 }
 
-// in the test suppose `validate:"in:<testDataString.constraintVal>"`
+// in the test suppose `validate:"in:<testDataString.constraintVal>"`.
 func TestStringInValidation(t *testing.T) {
 	tests := []struct {
 		in          testDataString
@@ -86,7 +87,7 @@ func TestStringRegexpValidation(t *testing.T) {
 	}
 }
 
-// check regexp as is
+// check regexp as is.
 func TestRegexp(t *testing.T) {
 	tests := []struct {
 		pattern  string
