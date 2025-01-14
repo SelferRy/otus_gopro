@@ -66,6 +66,7 @@ func TestValidate(t *testing.T) {
 				ValidationError{"Age", nil},
 				ValidationError{"Email", nil},
 				ValidationError{"Role", ErrValidation},
+				ValidationError{"Phones", ErrValidation},
 			},
 		}, {
 			in: App{
@@ -107,7 +108,8 @@ func TestValidate(t *testing.T) {
 			t.Parallel()
 
 			err := Validate(tt.in)
-			require.ErrorIs(t, err, tt.expectedErr)
+			//require.ErrorIs(t, err, tt.expectedErr)
+			require.Equal(t, tt.expectedErr, err)
 			_ = tt
 		})
 	}

@@ -32,6 +32,16 @@ func Validate(v interface{}) error {
 	for i := 0; i < numField; i++ {
 		typeField := vType.Field(i)
 		valField := vVal.Field(i)
+		unvalidated := func() bool {
+			constr, _ := defineConstraints(typeField)
+			if constr == nil {
+				return true
+			}
+			return false
+		}
+		if ok := unvalidated(); ok {
+			continue
+		}
 		validated, err := validateField(typeField, valField)
 		if err != nil {
 			log.Fatal("validation problem\n%w\n", err)
