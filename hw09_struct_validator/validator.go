@@ -70,7 +70,8 @@ func validateField(typeField reflect.StructField, valField reflect.Value) (Valid
 			errValid = ErrValidation
 		}
 	}
-	return ValidationError{Field: typeField.Name, Err: errValid}, nil
+	//nolint:nilerr
+	return ValidationError{Field: typeField.Name, Err: errValid}, nil // here error always nil, no need return err
 }
 
 // make map like {"len": 5, "...": "..."}.
