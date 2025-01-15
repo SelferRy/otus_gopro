@@ -30,14 +30,14 @@ func Validate(v interface{}) error {
 	vVal := reflect.ValueOf(v)
 	numField := vType.NumField()
 	errValid := make(ValidationErrors, 0)
+	unvalidated := func(typeField reflect.StructField) bool {
+		constr, _ := defineConstraints(typeField)
+		return constr == nil
+	}
 	for i := 0; i < numField; i++ {
 		typeField := vType.Field(i)
 		valField := vVal.Field(i)
-		unvalidated := func() bool {
-			constr, _ := defineConstraints(typeField)
-			return constr == nil
-		}
-		if ok := unvalidated(); ok {
+		if ok := unvalidated(typeField); ok {
 			continue
 		}
 		validated, err := validateField(typeField, valField)
@@ -56,6 +56,9 @@ func validateField(typeField reflect.StructField, valField reflect.Value) (Valid
 	}
 	var errValid error
 	for cName, cVal := range constraintMap {
+		if errValid != nil {
+			break
+		}
 		switch typeField.Type.Kind() {
 		case reflect.String:
 			errValid = validateString(valField.String(), cName, cVal)
