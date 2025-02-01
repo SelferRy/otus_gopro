@@ -18,8 +18,12 @@ var (
 	address string
 )
 
-// read flags, set logger.
+// set logger.
 func init() {
+	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stderr, nil)))
+}
+
+func readFlags() {
 	flag.DurationVar(&timeout, "timeout", 10*time.Second, "connection timeout")
 	flag.Parse()
 	if flag.NArg() < 2 {
@@ -30,11 +34,10 @@ func init() {
 		log.Fatal(`Incorrect value for the "port" parameter`)
 	}
 	address = net.JoinHostPort(flag.Arg(0), port)
-
-	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stderr, nil)))
 }
 
 func main() {
+	readFlags()
 	telnetClient := NewTelnetClient(address, timeout, os.Stdin, os.Stdout)
 	if err := telnetClient.Connect(); err != nil {
 		log.Fatal(fmt.Errorf("connection was failed. error: %w", err))
