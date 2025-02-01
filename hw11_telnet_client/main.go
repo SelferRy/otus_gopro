@@ -13,18 +13,13 @@ import (
 	"time"
 )
 
-var (
-	timeout time.Duration
-	address string
-)
-
 // set logger.
 func init() {
 	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stderr, nil)))
 }
 
-func readFlags() {
-	flag.DurationVar(&timeout, "timeout", 10*time.Second, "connection timeout")
+func readFlags() (time.Duration, string) {
+	timeout := flag.Duration("timeout", 10*time.Second, "connection timeout")
 	flag.Parse()
 	if flag.NArg() < 2 {
 		log.Fatal(`The "host" and "port" parameters are not specified`)
@@ -33,11 +28,12 @@ func readFlags() {
 	if _, err := strconv.Atoi(port); err != nil {
 		log.Fatal(`Incorrect value for the "port" parameter`)
 	}
-	address = net.JoinHostPort(flag.Arg(0), port)
+	address := net.JoinHostPort(flag.Arg(0), port)
+	return *timeout, address
 }
 
 func main() {
-	readFlags()
+	timeout, address := readFlags()
 	telnetClient := NewTelnetClient(address, timeout, os.Stdin, os.Stdout)
 	if err := telnetClient.Connect(); err != nil {
 		log.Fatal(fmt.Errorf("connection was failed. error: %w", err))
