@@ -29,7 +29,7 @@ func (c *client) Connect() (err error) {
 		return nil
 	}
 	c.conn, err = net.DialTimeout("tcp", c.address, c.timeout)
-	slog.Info(fmt.Sprintf("...connected to %s\n", c.address))
+	slog.Info(fmt.Sprintf("...connected to %s", c.address))
 	return err
 }
 
@@ -44,7 +44,7 @@ func (c *client) Close() error {
 func (c *client) Send() error {
 	_, err := io.Copy(c.conn, c.in)
 	if err != nil {
-		slog.Error(fmt.Sprintf("error during sending: %s", err.Error()))
+		slog.Error("error during sending:", slog.Any("error", err))
 	}
 	return err
 }
@@ -52,7 +52,7 @@ func (c *client) Send() error {
 func (c *client) Receive() error {
 	_, err := io.Copy(c.out, c.conn)
 	if err != nil {
-		slog.Error(fmt.Sprintf("error during receving: %s", err.Error()))
+		slog.Error("error during receiving:", slog.Any("error", err))
 	}
 	return err
 }
